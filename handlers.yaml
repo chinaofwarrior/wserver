@@ -1,0 +1,793 @@
+handlers:
+  # 所有请求示例 例[DW*334588000000156*0012*BLE,***]
+  # - 固定码 DW
+  # - 设备ID 334588000000156
+  # - 长度 LEN
+  # - 接口码 BLE
+  # 终端发送指令
+
+  # 1. 链路保持
+  - name: "LinkKeep"
+    type: 
+      - typeName: "LK"
+        code: 
+          - terminal: "DW*334588000000156*0002*LK"
+            param: []
+          - platform: "DW*334588000000156*0002*LK"
+            param: []
+      - typeName: "PING"
+        code: 
+          - terminal: "DW*334588000000156*0004*PING"
+            param: []
+          - platform: "DW*334588000000156*0006*PING"
+            param: ["bind"] # 是否绑定（0 表示未绑定，1 表示绑定）] [DW*334588000000156*0006*PING,0]或[DW*334588000000156*0006*PING,1]
+      - typeName: "KA"
+        code: 
+          - terminal: "DW*334588000000156*0014*KA" # [DW*334588000000156*0014*KA,120414,50,100,100]
+            param: ["data", "step", "roll", "power"]
+          - platform: "DW*334588000000156*0002*KA"
+            param: []
+  - name: "LocationData" # 位置数据上报
+    type:
+      - typeName: "UD"
+        code:
+          - terminal: "DW*334588000000156*00CD*UD"
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "base_station_count", "base_station_info", "wifi_count"]
+      - typeName: "UD_CDMA"
+        code:
+          - terminal: "DW*334588000000156*00CD*UD_CDMA"
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "sid", "nid", "bid", "signal"]
+      - typeName: "UP"
+        code:
+          - terminal: "DW*334588000000156*00DB*UP"
+            param: ["date", "time", "latitude", "longitude", "accuracy", "province", "city", "district", "street"]
+  # 2. 报警数据上报
+  - name: "AlarmData"
+    type:
+      - typeName: "AL"
+        code:
+          - terminal: "DW*334588000000156*00CD*AL"
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "base_station_count", "base_station_info", "wifi_count", "additional_info"]
+          - platform: "DW*334588000000156*0002*AL"
+            param: []
+      - typeName: "AL_CDMA"
+        code:
+          - terminal: "DW*334588000000156*00CD*AL_CDMA"
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "sid", "nid", "bid", "signal"]
+          - platform: "DW*334588000000156*0007*AL_CDMA"
+            param: []
+      - typeName: "ALARM"
+        code:
+          - terminal: "DW*334588000000156*00CD*ALARM"
+            param: ["date", "time", "latitude", "longitude", "accuracy", "province", "city", "district", "street", "terminal_status"]
+          - platform: "DW*334588000000156*0004*ALARM"
+            param: []
+
+  # 3. 获取服务器端时间处理器配置
+  - name: "ServerTime"
+    type:
+      # 时间戳格式
+      - typeName: "Time"
+        code:
+          # 终端发送请求服务器时间的指令
+          - terminal: "DW*334588000000156*0004*Time"
+            param: []
+          # 平台回复时间戳格式的服务器时间
+          - platform: "DW*334588000000156*000F*Time"
+            # 使用参数名称而不是具体值，以便动态替换
+            param: ["timestamp"]
+
+      # 字符串格式时间（带时区）
+      - typeName: "LGZONE"
+        code:
+          # 终端发送请求服务器时间的指令，带时区信息
+          - terminal: "DW*1234567890*0006*LGZONE"
+            param: []
+          # 平台回复时区、时间、日期格式的服务器时间
+          - platform: "DW*1234567890*001D*LGZONE"
+            # 使用参数名称而不是具体值，以便动态替换
+            param: ["timeZone", "time", "date"]
+
+  # 4. 新增的获取天气处理器配置
+  - name: "WeatherData"
+    type:
+      # 第一种方式：WT
+      - typeName: "WT"
+        code:
+          - terminal: "DW*334588000000156*009F*WT"
+            # 终端发送请求天气的指令，包含位置数据
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "base_station_count", "base_station_info", "wifi_count"]
+          - platform: "DW*334588000000156*009F*WT"
+            # 平台回复天气信息，包括日期时间、天气描述、天气编号等
+            param: ["date", "time", "weather_description", "weather_code", "current_temp", "low_temp", "high_temp", "city_name"]
+
+      # 第二种方式：WT2
+      - typeName: "WT2"
+        code:
+          - terminal: "DW*334588000000156*009F*WT2"
+            # 终端发送请求天气的指令，包含位置数据
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "base_station_count", "base_station_info", "wifi_count"]
+          - platform: "DW*334588000000156*009F*WT2"
+            # 平台回复天气信息，使用Unicode编码，包括地址、天气、实时温度等
+            param: ["address", "weather", "real_time_temp", "wind", "time"]
+  # 5. 新增的上传拍照内容处理器配置
+  - name: "Rcapture" # 上传拍照内容
+    type:
+      - typeName: "img"
+        code:
+          - terminal: "DW*334588000000156*len*img"
+            # 终端发送拍照内容的指令，包含拍照类型、时间和图片数据
+            param: ["x", "y", "z"]
+            # x => type - 拍照类型（5：远程拍照，6：主动拍照）
+            # y => time - 时间（年月日时分秒：160429110950）
+            # z => content - 照片内容（经过转码处理）
+            # 图片数据转码规则：
+            # 0X7D --> 0X7D 0X01
+            # 0X5B --> 0X7D 0X02
+            # 0X5D --> 0X7D 0X03
+            # 0X2C --> 0X7D 0X04
+            # 0X2A --> 0X7D 0X05
+          - platform: "DW*334588000000156*0003*img"
+            # 平台回复确认图片上传的指令
+            param: []
+
+  # 6. 新增的上传指令语音包处理器配置
+  - name: "VoiceCommand" # 上传指令语音包
+    type:
+      - typeName: "VOICE"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*VOICE"
+            # 终端发送语音指令的指令，包含AMR格式音频数据
+            param: ["amr_audio_data"]
+            # amr_audio_data - AMR格式音频数据（经过转码处理）
+            # 音频数据转码规则：
+            # 0X7D --> 0X7D 0X01
+            # 0X5B --> 0X7D 0X02
+            # 0X5D --> 0X7D 0X03
+            # 0X2C --> 0X7D 0X04
+            # 0X2A --> 0X7D 0X05
+          - platform: "DW*YYYYYYYYYYYYYYY*0007*VOICE"
+            # 平台回复确认语音指令的处理结果
+            param: ["error_code"]
+            # error_code - 错误码（0：非amr音频数据，1：语音识别不出，2：语音不对应任何指令）
+
+  # 7. 额外的平台回复指令示例
+  - name: "VoiceResponse" # 平台回复指令
+    type:
+      - typeName: "CALL"
+        code:
+          - platform: "DW*334588000000156*000F*CALL"
+            # 平台回复打电话给家人的指令
+            param: ["phone_number"]
+            # phone_number - 电话号码
+      - typeName: "POS"
+        code:
+          - platform: "DW*334588000000156*LEN*POS"
+            # 平台回复显示家人位置的指令，包含AMR格式音频数据
+            param: ["amr_audio_data"]
+            # amr_audio_data - AMR格式音频数据（需做转码处理）
+            # 音频数据转码规则（反向）：
+            # 0X7D 0X01 --> 0X7D
+            # 0X7D 0X02 --> 0X5B
+            # 0X7D 0X03 --> 0X5D
+            # 0X7D 0X04 --> 0X2C
+            # 0X7D 0X05 --> 0X2A
+
+  # 8. 新增的请求位置数据处理器配置
+  - name: "LocationRequest" # 请求位置数据
+    type:
+      - typeName: "WG"
+        code:
+          - terminal: "DW*8800000015*0087*WG"
+            # 终端发送请求位置数据的指令，包含位置数据
+            param: ["date", "time", "gps_status", "latitude", "latitude_dir", "longitude", "longitude_dir", "speed", "direction", "altitude", "satellite_count", "gsm_signal_strength", "battery", "step_count", "roll_count", "terminal_status", "base_station_count", "base_station_info", "wifi_count"]
+          - platform: "DW*8800000015*0021*WG"
+            # 平台回复包含纬度、经度、精确度和具体位置描述的位置数据
+            param: ["latitude", "longitude", "accuracy", "location_description"]
+            # latitude - 纬度
+            # longitude - 经度
+            # accuracy - 精准度
+            # location_description - 具体位置描述（使用Unicode编码）
+  
+  # 9. 新增的生成绑定所需的二维码处理器配置
+  - name: "GenerateQRCode" # 生成绑定所需的二维码
+    type:
+      # PNG格式二维码
+      - typeName: "CID"
+        code:
+          - terminal: "DW*334588000000156*0003*CID"
+            # 终端发送请求生成二维码的指令
+            param: []
+          - platform: "DW*设备ID*LEN*CID"
+            # 平台回复对应设备ID转换成的二维码图片205*205png格式
+            param: ["qr_code_png"]
+            # qr_code_png - 对应设备ID转换成的二维码图片205*205png格式
+            # 终端收到数据后需做转码处理
+
+      # JPG格式二维码
+      - typeName: "CID_JPG"
+        code:
+          - terminal: "DW*334588000000156*0003*CID_JPG"
+            # 终端发送请求生成二维码的指令（JPG格式）
+            param: []
+          - platform: "DW*设备ID*LEN*CID_JPG"
+            # 平台回复对应设备ID转换成的二维码图片128*128jpg格式
+            param: ["qr_code_jpg"]
+            # qr_code_jpg - 对应设备ID转换成的二维码图片128*128jpg格式
+            # 终端收到数据后需做转码处理
+            
+  # 10. 新增的终端自动解绑指令处理器配置
+  - name: "AutoUnbind" # 终端自动解绑指令
+    type:
+      - typeName: "DLT"
+        code:
+          - terminal: "DW*334588000000156*0003*DLT"
+            # 终端发送解绑指令
+            param: []
+          - platform: "DW*334588000000156*0003*DLT"
+            # 平台回复确认解绑的指令
+            param: []
+
+  # 11. 新增的上传蓝牙Mac地址数据处理器配置
+  - name: "UploadBluetoothMAC" # 上传蓝牙Mac地址数据
+    type:
+      - typeName: "BLE"
+        code:
+          - terminal: "DW*334588000000156*0012*BLE"
+            # 终端发送蓝牙Mac地址数据
+            param: ["x"]
+            # x => 表示 mac_address - Mac地址
+          - platform: "DW*334588000000156*0003*BLE"
+            # 平台回复确认接收的指令
+            param: []
+
+
+  # ====================>>     平台可发送指令     <===================
+
+  # 12. 新增的小红花个数设置指令处理器配置
+  - name: "SetFlowerCount" # 小红花个数设置指令
+    type:
+      - typeName: "FLOWER"
+        code:
+          - platform: "DW*334588000000156*0008*FLOWER"
+            # 平台发送设置小红花个数的指令
+            param: ["count"]
+            # count - 小红花个数
+          - terminal: "DW*334588000000156*0006*FLOWER"
+            # 终端回复确认设置的指令
+            param: []
+
+  # 13. 新增的绑定时当前开关数据处理器配置
+  - name: "CurrentSwitchData" # 绑定时当前开关数据
+    type:
+      - typeName: "INFO"
+        code:
+          - platform: "DW*334588000000156*0016*INFO,PEDO,step_switch,LowBat,low_battery_switch,FQCY,location_interval,Wear,wear_switch,Fall,fall_switch,Shake,shake_switch"
+            # 平台发送当前开关数据的指令
+            param: ["PEDO","step_switch", "LowBat", "low_battery_switch", "FQCY", "location_interval", "wear","wear_switch", "fall", "fall_switch", "Shake", "shake_switch"]
+            # 参数包括计步开关、低电开关状态、上传位置时间间隔等
+          - terminal: "DW*334588000000156*0004*INFO"
+            # 终端回复确认设置的指令
+            param: []
+
+  # 14. 新增的恢复出厂设置处理器配置
+  - name: "FactoryReset" # 恢复出厂设置
+    type:
+      - typeName: "FACTORY"
+        code:
+          - platform: "DW*334588000000156*0007*FACTORY"
+            # 平台发送恢复出厂设置的指令
+            param: []
+          - terminal: "DW*334588000000156*0007*FACTORY"
+            # 终端回复确认恢复出厂设置的指令
+            param: []
+
+  # 15. 新增的定位指令处理器配置
+  - name: "ImmediateLocation"
+    type:
+      - typeName: "CR"
+        code:
+          - terminal: "DW*334588000000156*0002*CR"
+            param: []
+          - platform: "DW*334588000000156*0002*CR"
+            param: []
+
+  # 16. 新增的关机指令处理器配置
+  - name: "Shutdown"
+    type:
+      - typeName: "POWEROFF"
+        code:
+          - platform: "DW*334588000000156*0008*POWEROFF"
+            param: []
+          - terminal: "DW*334588000000156*0008*RESET"
+            param: []
+
+  # 新增的拨打电话指令处理器配置
+  - name: "MakeCall"
+    type:
+      - typeName: "CALL"
+        code:
+          - platform: "DW*334588000000156*0010*CALL,phone_number"
+            param: ["phone_number"]
+          - terminal: "DW*334588000000156*0004*CALL"
+            param: []
+
+  # 新增的监听指令处理器配置
+  - name: "Monitor"
+    type:
+      - typeName: "MONITOR"
+        code:
+          - platform: "DW*334588000000156*0007*MONITOR"
+            param: []
+          - terminal: "DW*334588000000156*0007*MONITOR"
+            param: []
+          - platform: "DW*334588000000156*0013*MONITOR,phone_number"
+            param: ["phone_number"]
+          - terminal: "DW*334588000000156*0007*MONITOR"
+            param: []
+
+  # 新增的找手表指令处理器配置
+  - name: "FindWatch"
+    type:
+      - typeName: "FIND"
+        code:
+          - platform: "DW*334588000000156*0004*FIND"
+            param: []
+          - terminal: "DW*334588000000156*0004*FIND"
+            param: []
+
+  # 新增的远程拍照指令处理器配置
+  - name: "RemoteCapture"
+    type:
+      - typeName: "rcapture"
+        code:
+          - platform: "DW*334588000000156*0008*rcapture"
+            param: []
+          - terminal: "DW*334588000000156*0008*rcapture"
+            param: []
+
+  # 新增的数据上传间隔设置指令处理器配置
+  - name: "UploadInterval"
+    type:
+      - typeName: "UPLOAD"
+        code:
+          - platform: "DW*334588000000156*0009*UPLOAD,interval"
+            param: ["interval"]
+          - terminal: "DW*334588000000156*0006*UPLOAD"
+            param: []
+
+  # 新增的中心号码设置指令处理器配置
+  - name: "CenterNumber"
+    type:
+      - typeName: "CENTER"
+        code:
+          - platform: "DW*334588000000156*0012*CENTER,phone_number"
+            param: ["phone_number"]
+          - terminal: "DW*334588000000156*0006*CENTER"
+            param: []
+
+  # 新增的SOS号码设置指令处理器配置
+  - name: "SOSNumber"
+    type:
+      - typeName: "SOS"
+        code:
+          - platform: "DW*334588000000156*0027*SOS,phone_number1,phone_number2"
+            param: ["phone_number1", "phone_number2"]
+          - terminal: "DW*334588000000156*0003*SOS"
+            param: []
+
+  # 新增的SOS短信报警开关指令处理器配置
+  - name: "SOSSMS"
+    type:
+      - typeName: "SOSSMS"
+        code:
+          - platform: "DW*334588000000156*0008*SOSSMS,status"
+            param: ["status"]
+          - terminal: "DW*334588000000156*0006*SOSSMS"
+            param: []
+
+  # 新增的低电短信报警开关指令处理器配置
+  - name: "LowBatterySMS"
+    type:
+      - typeName: "LOWBAT"
+        code:
+          - platform: "DW*334588000000156*0008*LOWBAT,status"
+            param: ["status"]
+          - terminal: "DW*334588000000156*0006*LOWBAT"
+            param: []
+
+  # 新增的版本查询指令处理器配置
+  - name: "VersionQuery"
+    type:
+      - typeName: "VERNO"
+        code:
+          - platform: "DW*334588000000156*0005*VERNO"
+            param: []
+          - terminal: "DW*334588000000156*0028*VERNO,version"
+            param: ["version"]
+
+  # 新增的取下手环报警开关指令处理器配置
+  - name: "RemoveAlarm"
+    type:
+      - typeName: "REMOVE"
+        code:
+          - platform: "DW*334588000000156*0008*REMOVE,status"
+            param: ["status"]
+          - terminal: "DW*334588000000156*0006*REMOVE"
+            param: []
+
+  # 新增的取下手表短信报警开关指令处理器配置
+  - name: "RemoveSMS"
+    type:
+      - typeName: "REMOVESMS"
+        code:
+          - platform: "DW*334588000000156*0008*REMOVESMS,status"
+            param: ["status"]
+          - terminal: "DW*334588000000156*0006*REMOVESMS"
+            param: []
+
+  # 新增的计步功能开关指令处理器配置
+  - name: "StepCounter"
+    type:
+      - typeName: "PEDO"
+        code:
+          - platform: "DW*334588000000156*0004*PEDO,status"
+            param: ["status"]
+          - terminal: "DW*334588000000156*0004*PEDO"
+            param: []
+
+  # 新增的上课禁用时间段设置指令处理器配置
+  - name: "SilenceTimeCustom"
+    type:
+      - typeName: "SILENCETIME2"
+        code:
+          - platform: "DW*334588000000156*0038*SILENCETIME2,time_periods"
+            param: ["time_periods"]
+          - terminal: "DW*334588000000156*000C*SILENCETIME2"
+            param: []
+
+  # 新增的翻转检测时间段设置指令处理器配置
+  - name: "SleepTime"
+    type: 
+      - typeName: "SLEEPTIME"
+        code:
+          - platform: "DW*5678901234*0014*SLEEPTIME,time_period"
+            param: ["time_period"]
+          - terminal: "DW*5678901234*0009*SLEEPTIME"
+            param: []
+
+  # 新增的闹钟设置指令处理器配置
+  - name: "AlarmSetting"
+    type:
+      - typeName: "REMIND"
+        code:
+          - platform: "DW*334588000000156*0018*REMIND,alarm1,alarm2,alarm3"
+            # 平台发送闹钟设置的指令，包含最多三个闹钟设置
+            param: ["alarm1", "alarm2", "alarm3"]
+            # alarm1, alarm2, alarm3 - 闹钟设置，格式为：时间-开关-频率
+            # 例如：08:10-1-1 表示闹钟时间 8:10，打开，响铃一次
+            # 08:10-1-2 表示闹钟时间 8:10，打开，每天响铃
+            # 08:10-1-3-0111110 表示闹钟时间 8:10，打开，自定义周一至周五打开
+            # 最左边是周日，最右边是周六，即 0111110 的顺序是：周日，周一，周二，周三，周四，周五，周六（1 为打开，0 为关闭）
+          - terminal: "DW*334588000000156*0006*REMIND"
+            # 终端回复确认设置的指令
+            param: []
+
+  # ====================>>     微聊 指令 对讲功能（微聊发送语音）     <===================
+
+  # 新增的微聊对讲功能（群聊）处理器配置
+  - name: "GroupTalk"
+    type:
+      - typeName: "TK"
+        code:
+          - platform: "DW*334588000000156*LEN*TK,amr_audio_data"
+            param: ["amr_audio_data"]
+          - terminal: "DW*334588000000156*LEN*TK,result"
+            param: ["result"]
+      - typeName: "TKS"
+        code:
+          - platform: "DW*334588000000156*LEN*TKS,duration,amr_audio_data"
+            param: ["duration", "amr_audio_data"]
+          - terminal: "DW*334588000000156*LEN*TKS,result"
+            param: ["result"]
+
+  # 新增的微聊对讲功能（单聊）处理器配置
+  - name: "PrivateTalk"
+    type:
+      - typeName: "TKOne"
+        code:
+          - platform: "DW*334588000000156*LEN*TKOne,app_account,duration,amr_audio_data"
+            param: ["app_account", "duration", "amr_audio_data"]
+          - terminal: "DW*334588000000156*LEN*TKOne,result"
+            param: ["result"]
+
+  # 新增的平台发送图片数据处理器配置
+  - name: "SendImage"
+    type:
+      - typeName: "TKIMG"
+        code:
+          - platform: "DW*334588000000156*LEN*TKIMG,image_data"
+            param: ["image_data"]
+          - terminal: "DW*334588000000156*LEN*TKIMG,result"
+            param: ["result"]
+
+  # 新增的终端检测离线语音处理器配置
+  - name: "OfflineVoiceDetection"
+    type:
+      - typeName: "TKQ"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*TKQ"
+            param: []
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*TKQ"
+            param: []
+
+  # 新增的短语显示设置指令处理器配置
+  - name: "PhraseDisplay"
+    type:
+      - typeName: "MESSAGE"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*MESSAGE,phrase_content"
+            param: ["phrase_content"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*MESSAGE"
+            param: []
+
+  # 新增的设置电话本+白名单处理器配置
+  - name: "PhonebookWhitelist"
+    type:
+      - typeName: "PHL"
+        code:
+          - platform: "DW*334588000000156*len*PHL,phone_number,name"
+            param: ["phone_number", "name"]
+          - terminal: "DW*334588000000156*0003*PHL"
+            param: []
+
+  # 新增的白名单开关处理器配置
+  - name: "WhitelistSwitch"
+    type:
+      - typeName: "WLKEY"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*WLKEY,ONOFF"
+            param: ["ONOFF"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*WLKEY"
+            param: []
+
+  # 新增的情景模式处理器配置
+  - name: "SceneMode"
+    type:
+      - typeName: "profile"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*profile,mode"
+            param: ["mode"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*profile"
+            param: []
+
+  # 新增的跌倒提醒开关处理器配置
+  - name: "FallDownSwitch"
+    type:
+      - typeName: "FALLDOWN"
+        code:
+          - platform: "DW*334588000000156*LEN*FALLDOWN,ONOFF"
+            param: ["ONOFF"]
+          - terminal: "DW*334588000000156*LEN*FALLDOWN"
+            param: []
+
+  # 新增的震动提醒开关处理器配置
+  - name: "VibrationSwitch"
+    type:
+      - typeName: "SHAKE"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*SHAKE,ONOFF"
+            param: ["ONOFF"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*SHAKE"
+            param: []
+
+  # 新增的开关机时间设置处理器配置
+  - name: "BootOffTimeSetting"
+    type:
+      - typeName: "BOOTOFF"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*BOOTOFF,switch,on_time,off_time"
+            param: ["switch", "on_time", "off_time"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*BOOTOFF"
+            param: []
+
+  # 新增的设置WIFI名称和密码处理器配置
+  - name: "WIFISetting"
+    type:
+      - typeName: "WIFISET"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*WIFISET,wifi_name,wifi_password"
+            param: ["wifi_name", "wifi_password"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*WIFISET"
+            param: []
+
+  # 新增的拨号盘开关处理器配置
+  - name: "DialPadSwitch"
+    type:
+      - typeName: "KEYBRD"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*KEYBRD,switch"
+            param: ["switch"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*KEYBRD"
+            param: []
+
+  # 新增的开启或关闭远程录音功能处理器配置
+  - name: "RemoteRecordingSwitch"
+    type:
+      - typeName: "RECORD"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*RECORD,switch"
+            param: ["switch"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*RECORD"
+            param: []
+
+  # 新增的开启或关闭智能录音功能处理器配置
+  - name: "SmartRecordingSwitch"
+    type:
+      - typeName: "AIRECORD"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*AIRECORD,switch"
+            param: ["switch"]
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*AIRECORD"
+            param: []
+
+  #  - name: "MSGQ" # 获取离线文字 获取离线文字信息，请求[DW*334588000000156*0004*MSGQ]
+  # ====================>>     健康数据     <<===================
+  
+  # 新增的设置心率上传频率处理器配置
+  - name: "HeartRateUploadFrequency"
+    type:
+      - typeName: "hrtstart"
+        code:
+          - platform: "DW*334588000000156*len*hrtstart,interval"
+            param: ["interval"]
+          - terminal: "DW*334588000000156*len*hrtstart"
+            param: []
+
+  # 新增的终端心率上传处理器配置
+  - name: "HeartRateUpload"
+    type:
+      - typeName: "heart"
+        code:
+          - terminal: "DW*334588000000156*len*heart,rate"
+            param: ["rate"] # 心率
+          - platform: "DW*334588000000156*0005*heart"
+            param: []
+
+  # 新增的设置体温上传频率处理器配置
+  - name: "TemperatureUploadFrequency"
+    type:
+      - typeName: "wdstart"
+        code:
+          - platform: "DW*334588000000156*len*wdstart,interval"
+            param: ["interval"] # 上传间隔,如果设置1就代表单次上传上传后关闭,设置0代表该功能关闭
+          - terminal: "DW*334588000000156*len*wdstart"
+            param: []
+
+  # 新增的上传体温数据处理器配置
+  - name: "TemperatureUpload"
+    type:
+      - typeName: "temp"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*temp,temperature"
+            param: ["temperature"] # fload 值的温度
+          - platform: "DW*334588000000156*0004*temp"
+            param: []
+
+  # 新增的设置血压上传频率处理器配置
+  - name: "BloodPressureUploadFrequency"
+    type:
+      - typeName: "bldstart"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*bldstart,interval"
+            param: ["interval"] # 上传间隔,如果设置1就代表单次上传上传后关闭,设置0代表该功能关闭
+          - terminal: "DW*334588000000156*0005*bldstart"
+            param: []
+
+  # 新增的上传血压数据处理器配置
+  - name: "BloodPressureUpload"
+    type:
+      - typeName: "blood"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*blood,systolic,diastolic"
+            param: ["systolic", "diastolic"] # x 是 systolic 收缩压(高压) y 是 diastolic 舒张压(高压)
+          - platform: "DW*334588000000156*0005*blood"
+            param: []
+
+  # 新增的血压心率上传处理器配置
+  - name: "BloodPressureHeartRateUpload"
+    type:
+      - typeName: "bphrt"
+        code:
+          - terminal: "DW*334588000000156*len*bphrt,systolic,diastolic,heart_rate,height,gender,age,weight"
+            param: ["systolic", "diastolic", "heart_rate", "height", "gender", "age", "weight"]
+          - platform: "DW*334588000000156*len*bphrt"
+            param: []
+
+  # 新增的设置血氧上传频率处理器配置
+  - name: "OxygenUploadFrequency"
+    type:
+      - typeName: "oxstart"
+        code:
+          - platform: "DW*334588000000156*len*oxstart,interval"
+            param: ["interval"] # 上传间隔,如果设置1就代表单次上传上传后关闭,设置0代表该功能关闭
+          - terminal: "DW*334588000000156*len*oxstart"
+            param: []
+
+  # 新增的上传血氧数据处理器配置
+  - name: "OxygenUpload"
+    type:
+      - typeName: "oxygen"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*oxygen,oxygen_saturation"
+            param: ["oxygen_saturation"] # x 表示血氧饱和度
+          - platform: "DW*334588000000156*0006*oxygen"
+            param: []
+
+  # ====================>>     音视频聊天（智能机）     <<===================
+
+  # 新增的获取音视频账号处理器配置
+  - name: "GetAVAccount"
+    type:
+      - typeName: "EASE"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*EASE"
+            param: []
+          - platform: "DW*设备ID*LEN*EASE,account,password"
+            param: ["account", "password"]
+
+  # 新增的获取群成员列表处理器配置
+  - name: "GetGroupMembers"
+    type:
+      - typeName: "MEMBERS"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*MEMBERS"
+            param: []
+          - platform: "DW*设备ID*LEN*MEMBERS,account1,nickname1,phone1,account2,nickname2,phone2"
+            param: ["account1", "nickname1", "phone1", "account2", "nickname2", "phone2"]
+
+  # 新增的视频通话授权接口处理器配置
+  - name: "VideoCallAuthorization"
+    type:
+      - typeName: "TALK"
+        code:
+          - terminal: "DW*YYYYYYYYYYYYYYY*LEN*TALK,call_type,peer_account"
+            param: ["call_type", "peer_account"]
+          - platform: "DW*设备ID*LEN*TALK,result"
+            param: ["result"]
+
+  # 新增的对方拒接音视频聊天请求处理器配置
+  - name: "RejectAVChat"
+    type:
+      - typeName: "RTALK"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*RTALK,rejecter_id,conference_id,av_type"
+            param: ["rejecter_id", "conference_id", "av_type"]
+          - terminal: "DW*设备ID*LEN*RTALK"
+            param: []
+
+  # 新增的通知对方有音视频聊天请求处理器配置
+  - name: "NotifyAVChatRequest"
+    type:
+      - typeName: "CALLING"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*CALLING,caller_id,conference_id,av_type"
+            param: ["caller_id", "conference_id", "av_type"]
+          - terminal: "DW*设备ID*LEN*CALLING,av_status"
+            param: ["av_status"]
+
+  # 新增的设备端拒接音视频聊天请求处理器配置
+  - name: "RejectAVChatRequest"
+    type:
+      - typeName: "RCALLING"
+        code:
+          - platform: "DW*YYYYYYYYYYYYYYY*LEN*RCALLING,caller_id,conference_id,av_type"
+            param: ["caller_id", "conference_id", "av_type"]
+          - terminal: "DW*设备ID*LEN*RCALLING"
+            param: []
+
+
+  
+  
+  
+  

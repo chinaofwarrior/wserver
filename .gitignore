@@ -1,0 +1,15 @@
+.idea/
+.vscode/
+vendor/github.com/
+.mp4
+.png
+.jpg
+.exe
+.out
+.test
+debug
+debug.test
+nohup.out
+test.db
+log.ini
+temp

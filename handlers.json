@@ -1,0 +1,10 @@
+{
+    "handlers": [
+        {"name": "LinkKeep", "type": ["LK", "PING", "KA"], "Enabled": "1"},
+        {"name": "LocationData", "type": ["UD", "UD_CDMA", "UP"], "Enabled": "1"},
+        {"name": "AlarmData", "type": ["AL", "AL_CDMA", "ALARM"], "Enabled": "1"},
+        {"name": "ServerTime", "type": ["Time", "LGZONE"], "Enabled": "1"},
+        {"name": "Weather", "type": ["WT", "WT2", "ALARM"], "Enabled": "1"},
+        {"name": "Rcapture", "type": ["WT", "WT2", "ALARM"], "Enabled": "1"}
+    ]
+}
